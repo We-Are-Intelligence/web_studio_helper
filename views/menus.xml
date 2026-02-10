@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Root app menu -->
+    <record id="menu_studio_helper_root" model="ir.ui.menu">
+        <field name="name">Studio Helper</field>
+        <field name="web_icon">fa fa-pencil,#262c34,#FFFFFF</field>
+    </record>
+
+    <!-- Child menus -->
+    <record id="menu_created_models" model="ir.ui.menu">
+        <field name="name">Created Models</field>
+        <field name="parent_id" ref="menu_studio_helper_root"/>
+        <field name="action" ref="action_created_models"/>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="menu_created_fields" model="ir.ui.menu">
+        <field name="name">Created Fields</field>
+        <field name="parent_id" ref="menu_studio_helper_root"/>
+        <field name="action" ref="action_created_fields"/>
+        <field name="sequence">2</field>
+    </record>
+
+    <record id="menu_model_data" model="ir.ui.menu">
+        <field name="name">Model Data</field>
+        <field name="parent_id" ref="menu_studio_helper_root"/>
+        <field name="action" ref="action_model_data"/>
+        <field name="sequence">3</field>
+    </record>
+
+    <record id="menu_model_access" model="ir.ui.menu">
+        <field name="name">Model Access</field>
+        <field name="parent_id" ref="menu_studio_helper_root"/>
+        <field name="action" ref="server_action_helper_model_access"/>
+        <field name="sequence">4</field>
+    </record>
+
+    <record id="menu_views" model="ir.ui.menu">
+        <field name="name">Views</field>
+        <field name="parent_id" ref="menu_studio_helper_root"/>
+        <field name="action" ref="action_views"/>
+        <field name="sequence">8</field>
+    </record>
+
+    <record id="menu_rules" model="ir.ui.menu">
+        <field name="name">Record Rules</field>
+        <field name="parent_id" ref="menu_studio_helper_root"/>
+        <field name="action" ref="server_action_helper_rules"/>
+        <field name="sequence">5</field>
+    </record>
+
+    <record id="menu_actions" model="ir.ui.menu">
+        <field name="name">Actions</field>
+        <field name="parent_id" ref="menu_studio_helper_root"/>
+        <field name="action" ref="server_action_helper_actions"/>
+        <field name="sequence">6</field>
+    </record>
+
+    <record id="menu_menu" model="ir.ui.menu">
+        <field name="name">Menus</field>
+        <field name="parent_id" ref="menu_studio_helper_root"/>
+        <field name="action" ref="server_action_helper_menus"/>
+        <field name="sequence">7</field>
+    </record>
+</odoo>
