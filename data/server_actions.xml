@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ============================================================
+         Server Action: Cleanup Studio Model References
+         Triggered on ir.model unlink via base.automation
+         ============================================================ -->
+    <record id="server_action_cleanup_studio_model" model="ir.actions.server">
+        <field name="name">Cleanup Studio Model References</field>
+        <field name="model_id" ref="base.model_ir_model"/>
+        <field name="state">code</field>
+        <field name="usage">base_automation</field>
+        <field name="code"><![CDATA[
+# 'records' is the set of ir.model records being deleted
+for model in records:
+    # ---------------------------------------------------------
+    # 1. FIND ACTIONS & MENUS (must be done FIRST)
+    # ---------------------------------------------------------
+    window_actions = env['ir.actions.act_window'].search([
+        ('res_model', '=', model.model),
+    ])
+
+    server_actions = env['ir.actions.server'].search([
+        ('model_id', '=', model.id),
+    ])
+
+    menu_items = env['ir.ui.menu']  # empty recordset
+
+    for action in window_actions:
+        action_ref = '%s,%s' % (action._name, action.id)
+        menu_items |= env['ir.ui.menu'].search([
+            ('action', '=', action_ref),
+        ])
+
+    for action in server_actions:
+        action_ref = '%s,%s' % (action._name, action.id)
+        menu_items |= env['ir.ui.menu'].search([
+            ('action', '=', action_ref),
+        ])
+
+    if menu_items:
+        env['ir.model.data'].search([
+            ('model', '=', 'ir.ui.menu'),
+            ('res_id', 'in', menu_items.ids),
+            ('module', '=', 'studio_customization'),
+        ]).unlink()
+
+    # ---------------------------------------------------------
+    # 2. CLEAN REGISTRY FOR ACTIONS
+    # ---------------------------------------------------------
+    if window_actions:
+        env['ir.model.data'].search([
+            ('model', '=', 'ir.actions.act_window'),
+            ('res_id', 'in', window_actions.ids),
+            ('module', '=', 'studio_customization'),
+        ]).unlink()
+
+    if server_actions:
+        env['ir.model.data'].search([
+            ('model', '=', 'ir.actions.server'),
+            ('res_id', 'in', server_actions.ids),
+            ('module', '=', 'studio_customization'),
+        ]).unlink()
+
+    # ---------------------------------------------------------
+    # 3. CLEAN UP FIELDS
+    # ---------------------------------------------------------
+    model_fields = env['ir.model.fields'].search([
+        ('model_id', '=', model.id),
+    ])
+    if model_fields:
+        env['ir.model.data'].search([
+            ('model', '=', 'ir.model.fields'),
+            ('res_id', 'in', model_fields.ids),
+            ('module', '=', 'studio_customization'),
+        ]).unlink()
+
+    # ---------------------------------------------------------
+    # 4. CLEAN UP ACCESS RIGHTS
+    # ---------------------------------------------------------
+    access_rules = env['ir.model.access'].search([
+        ('model_id', '=', model.id),
+    ])
+    if access_rules:
+        env['ir.model.data'].search([
+            ('model', '=', 'ir.model.access'),
+            ('res_id', 'in', access_rules.ids),
+            ('module', '=', 'studio_customization'),
+        ]).unlink()
+
+    # ---------------------------------------------------------
+    # 5. CLEAN UP RECORD RULES
+    # ---------------------------------------------------------
+    record_rules = env['ir.rule'].search([
+        ('model_id', '=', model.id),
+    ])
+    if record_rules:
+        env['ir.model.data'].search([
+            ('model', '=', 'ir.rule'),
+            ('res_id', 'in', record_rules.ids),
+            ('module', '=', 'studio_customization'),
+        ]).unlink()
+
+    # ---------------------------------------------------------
+    # 6. CLEAN UP VIEWS
+    # ---------------------------------------------------------
+    studio_views = env['ir.ui.view'].search([
+        ('model', '=', model.model),
+    ])
+    if studio_views:
+        env['ir.model.data'].search([
+            ('model', '=', 'ir.ui.view'),
+            ('res_id', 'in', studio_views.ids),
+            ('module', '=', 'studio_customization'),
+        ]).unlink()
+
+    # ---------------------------------------------------------
+    # 7. CLEAN UP THE MODEL'S OWN XML ID (last step)
+    # ---------------------------------------------------------
+    env['ir.model.data'].search([
+        ('model', '=', 'ir.model'),
+        ('res_id', '=', model.id),
+        ('module', '=', 'studio_customization'),
+    ]).unlink()
+]]></field>
+    </record>
+
+    <!-- ============================================================
+         Server Action: Cleanup Studio Field References
+         Triggered on ir.model.fields unlink via base.automation
+         ============================================================ -->
+    <record id="server_action_cleanup_studio_field" model="ir.actions.server">
+        <field name="name">Cleanup Studio Field References</field>
+        <field name="model_id" ref="base.model_ir_model_fields"/>
+        <field name="state">code</field>
+        <field name="usage">base_automation</field>
+        <field name="code"><![CDATA[
+for field in records:
+    # ---------------------------------------------------------
+    # 1. CLEAN UP THE FIELD REGISTRY (ir.model.data)
+    # ---------------------------------------------------------
+    field_xml_ids = env['ir.model.data'].search([
+        ('model', '=', 'ir.model.fields'),
+        ('res_id', '=', field.id),
+        ('module', '=', 'studio_customization'),
+    ])
+    if field_xml_ids:
+        field_xml_ids.unlink()
+
+    # ---------------------------------------------------------
+    # 2. CLEAN UP SELECTION OPTIONS
+    # ---------------------------------------------------------
+    if field.ttype == 'selection':
+        selection_options = env['ir.model.fields.selection'].search([
+            ('field_id', '=', field.id),
+        ])
+        if selection_options:
+            env['ir.model.data'].search([
+                ('model', '=', 'ir.model.fields.selection'),
+                ('res_id', 'in', selection_options.ids),
+                ('module', '=', 'studio_customization'),
+            ]).unlink()
+]]></field>
+    </record>
+
+  <record id="server_action_helper_menus" model="ir.actions.server">
+    <field name="code"><![CDATA[studio_ids = env['ir.model.data'].sudo().search([
+    ('module', '=', 'studio_customization'),
+    ('model', '=', 'ir.ui.menu')
+]).mapped('res_id')
+
+action = {
+    'name': 'Studio Menus',
+    'type': 'ir.actions.act_window',
+    'res_model': 'ir.ui.menu',
+    'view_mode': 'list,form',
+    'domain': [('id', 'in', studio_ids)],
+}]]></field>
+    <field name="model_id" ref="base.model_ir_ui_menu"/>
+    <field name="state">code</field>
+    <field name="name">Studio Menus</field>
+  </record>
+
+  <record id="server_action_helper_actions" model="ir.actions.server">
+    <field name="code"><![CDATA[studio_ids = env['ir.model.data'].sudo().search([
+    ('module', '=', 'studio_customization'),
+    ('model', '=like', 'ir.actions.%')
+]).mapped('res_id')
+
+action = {
+    'name': 'Studio Actions',
+    'type': 'ir.actions.act_window',
+    'res_model': 'ir.actions.actions',
+    'view_mode': 'list,form',
+    'domain': [('id', 'in', studio_ids)],
+}]]></field>
+    <field name="model_id" ref="base.model_ir_actions_server"/>
+    <field name="state">code</field>
+    <field name="name">Studio Actions</field>
+  </record>
+
+  <record id="server_action_helper_rules" model="ir.actions.server">
+    <field name="code"><![CDATA[studio_ids = env['ir.model.data'].sudo().search([
+    ('module', '=', 'studio_customization'),
+    ('model', '=', 'ir.rule')
+]).mapped('res_id')
+
+action = {
+    'name': 'Studio Record Rules',
+    'type': 'ir.actions.act_window',
+    'res_model': 'ir.rule',
+    'view_mode': 'list,form',
+    'domain': [('id', 'in', studio_ids)],
+}]]></field>
+    <field name="model_id" ref="base.model_ir_rule"/>
+    <field name="state">code</field>
+    <field name="name">Studio Record Rules</field>
+  </record>
+
+  <record id="server_action_helper_model_access" model="ir.actions.server">
+    <field name="code"><![CDATA[studio_ids = env['ir.model.data'].sudo().search([
+    ('module', '=', 'studio_customization'),
+    ('model', '=', 'ir.model.access')
+]).mapped('res_id')
+
+action = {
+    'name': 'Studio Model Access',
+    'type': 'ir.actions.act_window',
+    'res_model': 'ir.model.access',
+    'view_mode': 'list,form',
+    'domain': [('id', 'in', studio_ids)],
+}]]></field>
+    <field name="model_id" ref="base.model_ir_model_access"/>
+    <field name="state">code</field>
+    <field name="name">Studio Model Access</field>
+  </record>
+
+</odoo>

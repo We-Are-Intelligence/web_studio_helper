@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="action_created_models" model="ir.actions.act_window">
+        <field name="name">Created Models</field>
+        <field name="res_model">ir.model</field>
+        <field name="domain">[('model', '=like', 'x_%')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Studio-created models found.
+            </p>
+            <p>Models whose technical name starts with <code>x_</code> will appear here.</p>
+        </field>
+    </record>
+
+    <record id="action_created_fields" model="ir.actions.act_window">
+        <field name="name">Created Fields</field>
+        <field name="res_model">ir.model.fields</field>
+        <field name="domain">[('name', '=like', 'x\_%')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Studio-created fields found.
+            </p>
+            <p>Fields whose technical name starts with <code>x_</code> will appear here.</p>
+        </field>
+    </record>
+
+    <record id="action_model_data" model="ir.actions.act_window">
+        <field name="name">Model Data</field>
+        <field name="res_model">ir.model.data</field>
+        <field name="domain">[('module', '=', 'studio_customization')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Studio metadata entries found.
+            </p>
+            <p>All <code>ir.model.data</code> records owned by the
+               <em>studio_customization</em> module appear here.</p>
+        </field>
+    </record>
+
+    <record id="action_views" model="ir.actions.act_window">
+        <field name="name">Views</field>
+        <field name="res_model">ir.ui.view</field>
+        <field name="domain">[('model', '=like', 'x_%')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No views for Studio-created models found.
+            </p>
+        </field>
+    </record>
+
+    <!--
+
+    <record id="action_model_access" model="ir.actions.act_window">
+        <field name="name">Model Access</field>
+        <field name="res_model">ir.model.access</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No access control entries found.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_rules" model="ir.actions.act_window">
+        <field name="name">Record Rules</field>
+        <field name="res_model">ir.rule</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No record rules found.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_actions" model="ir.actions.act_window">
+        <field name="name">Actions</field>
+        <field name="res_model">ir.actions.actions</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No actions found.
+            </p>
+        </field>
+    </record>
+
+    -->
+
+</odoo>
